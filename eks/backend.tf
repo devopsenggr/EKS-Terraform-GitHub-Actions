@@ -6,6 +6,7 @@ terraform {
       version = "~> 5.49.0"
     }
   }
+
   backend "s3" {
     bucket         = "my-ews-baket132"
     region         = "us-east-1"
