@@ -1,3 +1,4 @@
+//first create s3 bucket and update in eks/backend.tf
 // create a Iam Role with ec2 usecase and administrative access and attach the role to ec2 instance(jenkins server)
 // use userdata as tools.sh file 
 //install terraform in jenkins server and add in global tools /usr/bin/
