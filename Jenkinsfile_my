@@ -1,0 +1,59 @@
+properties([
+    parameters([
+        string(
+            defaultValue: 'dev',
+            name: 'Environment'
+        ),
+        choice(
+            choices: ['plan', 'apply', 'destroy'], 
+            name: 'Terraform_Action'
+        )])
+])
+pipeline {
+    agent any
+    stages {
+        stage('Preparing') {
+            steps {
+                cleanWs()
+                sh 'echo Preparing'
+            }
+        }
+        stage('Git Pulling') {
+            steps {
+                git branch: 'master', url: 'https://github.com/devopsenggr/EKS-Terraform-GitHub-Actions.git'
+            }
+        }
+        stage('Init') {
+            steps {
+                
+                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                sh 'sudo terraform -chdir=eks/ init -lock=false -upgrade'
+                } //install aws pipeline steps plugin
+            }
+        }
+        stage('Validate') {
+            steps {
+                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                sh 'sudo terraform -chdir=eks/ validate -lock=false'
+                }
+            }
+        }
+        stage('Action') {
+            steps {
+                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                    script {    
+                        if (params.Terraform_Action == 'plan') {
+                            sh "sudo terraform -chdir=eks/ plan -var-file=${params.Environment}.tfvars -lock=false"
+                        }   else if (params.Terraform_Action == 'apply') {
+                            sh "sudo terraform -chdir=eks/ apply -var-file=${params.Environment}.tfvars -auto-approve -lock=false"
+                        }   else if (params.Terraform_Action == 'destroy') {
+                            sh "sudo terraform -chdir=eks/ destroy -var-file=${params.Environment}.tfvars -auto-approve -lock=false"
+                        } else {
+                            error "Invalid value for Terraform_Action: ${params.Terraform_Action}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
