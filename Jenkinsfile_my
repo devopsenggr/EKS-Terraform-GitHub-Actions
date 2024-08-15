@@ -1,3 +1,11 @@
+// create a Iam Role with ec2 usecase and administrative access and attach the role to ec2 instance(jenkins server)
+// use userdata as tools.sh file 
+//install terraform in jenkins server and add in global tools /usr/bin/
+//install awscli and aws configure 
+//jenkins plugins: install aws credentials,aws pipeline steps,easy2 ssh,terraform,pipeline stage view
+
+
+
 properties([
     parameters([
         string(
@@ -26,14 +34,14 @@ pipeline {
         stage('Init') {
             steps {
                 withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                sh 'sudo terraform -chdir=eks/ init -lock=false -upgrade'
+                sh 'terraform -chdir=eks/ init -lock=false -upgrade' //use -lock=false if dynamoBD not configured in backend remote statefile.tf
                 } //install aws pipeline steps plugin
             }
         }
         stage('Validate') {
             steps {
                 withAWS(credentials: 'aws-creds', region: 'us-east-1') {
-                sh 'sudo terraform -chdir=eks/ validate -lock=false'
+                sh 'terraform -chdir=eks/ validate'
                 }
             }
         }
@@ -42,11 +50,11 @@ pipeline {
                 withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                     script {    
                         if (params.Terraform_Action == 'plan') {
-                            sh "sudo terraform -chdir=eks/ plan -var-file=${params.Environment}.tfvars -lock=false"
+                            sh "terraform -chdir=eks/ plan -var-file=${params.Environment}.tfvars -lock=false"
                         }   else if (params.Terraform_Action == 'apply') {
-                            sh "sudo terraform -chdir=eks/ apply -var-file=${params.Environment}.tfvars -auto-approve -lock=false"
+                            sh "terraform -chdir=eks/ apply -var-file=${params.Environment}.tfvars -auto-approve -lock=false"
                         }   else if (params.Terraform_Action == 'destroy') {
-                            sh "sudo terraform -chdir=eks/ destroy -var-file=${params.Environment}.tfvars -auto-approve -lock=false"
+                            sh "terraform -chdir=eks/ destroy -var-file=${params.Environment}.tfvars -auto-approve -lock=false"
                         } else {
                             error "Invalid value for Terraform_Action: ${params.Terraform_Action}"
                         }
