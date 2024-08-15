@@ -14,7 +14,7 @@ pipeline {
     stages {
         stage('Preparing') {
             steps {
-                cleanWs()
+                
                 sh 'echo Preparing'
             }
         }
@@ -25,7 +25,6 @@ pipeline {
         }
         stage('Init') {
             steps {
-                
                 withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                 sh 'sudo terraform -chdir=eks/ init -lock=false -upgrade'
                 } //install aws pipeline steps plugin
