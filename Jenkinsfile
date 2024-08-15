@@ -24,9 +24,12 @@ pipeline {
         }
         stage('Init') {
             steps {
-                withAWS(credentials: 'aws-creds', region: 'us-east-1') {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-creds', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+    sh 'terraform -chdir=eks/ init' 
+}
+                /*withAWS(credentials: 'aws-creds', region: 'us-east-1') {
                 sh 'terraform -chdir=eks/ init'
-                }
+                } */
             }
         }
         stage('Validate') {
