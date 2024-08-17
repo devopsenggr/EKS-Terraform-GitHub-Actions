@@ -4,10 +4,10 @@ provider "aws"{
 resource "aws_dynamodb_table" "terraform_lock" {
  name = "terraform-lock"
  billing+mode = "PAY_PER_REQUEST"
-hash_key = "LockID"
+  hash_key = "LockID"
 
 attribute {
- name ="LockID"
+ name = "LockID"
 type = "s"
 }
 
